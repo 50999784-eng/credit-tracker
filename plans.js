@@ -24,9 +24,9 @@ window.UIBE_PLANS = {
         { id: "accounting", label: "英语类–会计学", enabled: false }
       ],
       doubleReq: {
-        law: { base: 73, other: 57, pro: 130, ge: 48, course: 178, practice: 28, total: 206 },
-        finance: { base: 73, other: 46, pro: 119, ge: 64, course: 183, practice: 28, total: 211 },
-        accounting: { base: 67, other: 42, pro: 109, ge: 64, course: 173, practice: 28, total: 201 }
+        law: { base: 73, opt: 33, dir: 24, pro: 130, ge: 48, course: 178, practice: 28, total: 206 },
+        finance: { base: 73, opt: 16, dir: 30, pro: 119, ge: 64, course: 183, practice: 28, total: 211 },
+        accounting: { base: 67, opt: 16, dir: 26, pro: 109, ge: 64, course: 173, practice: 28, total: 201 }
       },
       mainTracks: [
         { id: "english-lit", label: "英语（文学方向）", degree: "英语专业" },
@@ -44,9 +44,9 @@ window.UIBE_PLANS = {
         { id: "accounting", label: "英语类–会计学", enabled: true }
       ],
       doubleReq: {
-        law: { base: 73, other: 57, pro: 130, ge: 48, course: 178, practice: 28, total: 206 },
-        finance: { base: 73, other: 46, pro: 119, ge: 64, course: 183, practice: 28, total: 211 },
-        accounting: { base: 67, other: 42, pro: 109, ge: 64, course: 173, practice: 28, total: 201 }
+        law: { base: 73, opt: 33, dir: 24, pro: 130, ge: 48, course: 178, practice: 28, total: 206 },
+        finance: { base: 73, opt: 16, dir: 30, pro: 119, ge: 64, course: 183, practice: 28, total: 211 },
+        accounting: { base: 67, opt: 16, dir: 26, pro: 109, ge: 64, course: 173, practice: 28, total: 201 }
       },
       mainTracks: [
         { id: "english-lit", label: "英语（文学方向）", degree: "英语专业" },
@@ -64,9 +64,9 @@ window.UIBE_PLANS = {
         { id: "accounting", label: "英语类–会计学", enabled: true }
       ],
       doubleReq: {
-        law: { base: 73, other: 57, pro: 130, ge: 48, course: 178, practice: 28, total: 206 },
-        finance: { base: 73, other: 46, pro: 119, ge: 64, course: 183, practice: 28, total: 211 },
-        accounting: { base: 67, other: 42, pro: 109, ge: 64, course: 173, practice: 28, total: 201 }
+        law: { base: 73, opt: 33, dir: 24, pro: 130, ge: 48, course: 178, practice: 28, total: 206 },
+        finance: { base: 73, opt: 16, dir: 30, pro: 119, ge: 64, course: 183, practice: 28, total: 211 },
+        accounting: { base: 67, opt: 16, dir: 26, pro: 109, ge: 64, course: 173, practice: 28, total: 201 }
       },
       mainTracks: [
         { id: "english-lit", label: "英语（文学方向）", degree: "英语专业" },
