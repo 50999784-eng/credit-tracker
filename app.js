@@ -63,7 +63,15 @@
   function getMainCourses() {
     const y = getYearData();
     if (!y || state.channel !== "normal" || !state.mainId) return [];
-    return (y.majors && y.majors[state.mainId]) || [];
+    const keyMap = {
+      "business-english": "business",
+      "english-lit": "lit",
+      "english-lin": "lin",
+      "english-media": "media",
+      "translation": "translation"
+    };
+    const key = keyMap[state.mainId] || state.mainId;
+    return (y.majors && y.majors[key]) || [];
   }
 
   function getSecondProgram() {
