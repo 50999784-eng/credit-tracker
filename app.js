@@ -128,11 +128,19 @@
       const prog = y.double && y.double[state.doubleId];
       if (prog) {
         prog.forEach(function (c) {
-          const isBase = c.block === "majorReq";
+          let block = "double:opt";
+          let blockName = "学科基础选修课（含专业交叉融合）";
+          if (c.block === "majorReq") {
+            block = "double:req";
+            blockName = "学科基础必修课";
+          } else if (c.block === "dirReq") {
+            block = "double:dir";
+            blockName = "专业方向必修课";
+          }
           rows.push({
             group: "双学士学位项目",
-            blockName: isBase ? "专业必修课（学科基础必修）" : "专业选修 / 方向课程目录",
-            block: isBase ? "double:req" : "double:opt",
+            blockName: blockName,
+            block: block,
             c: c
           });
         });
@@ -198,8 +206,9 @@
     if (isDouble) {
       const y = CONFIG.years[state.year];
       const dreq = y && y.doubleReq && y.doubleReq[state.doubleId];
-      addBlock("double:req", "双学士专业必修课（学科基础必修）", (dreq && dreq.base) || 0, "双学士学位");
-      addBlock("double:opt", "双学士专业选修 / 方向课程", (dreq && dreq.other) || 0, "双学士学位");
+      addBlock("double:req", "学科基础必修课", (dreq && dreq.base) || 0, "双学士学位");
+      addBlock("double:opt", "学科基础选修课（含专业交叉融合）", (dreq && dreq.opt) || 0, "双学士学位");
+      addBlock("double:dir", "专业方向必修课", (dreq && dreq.dir) || 0, "双学士学位");
     }
     const prog = getSecondProgram();
     if (prog && prog.creditNote) {
