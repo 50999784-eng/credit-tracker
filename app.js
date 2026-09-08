@@ -147,30 +147,33 @@
 
   function blockRequirement() {
     const req = {};
-    function addBlock(key, label, need) {
-      req[key] = { label: label, need: need, have: 0, selected: 0 };
+    const isDouble = state.channel === "double";
+    function addBlock(key, label, need, group) {
+      req[key] = { label: label, need: need, have: 0, selected: 0, group: group };
     }
-    (CONFIG.commonBlocks || []).forEach(function (b) {
-      addBlock("common:" + b.key, b.label, b.req);
-    });
-    (CONFIG.practiceBlocks || []).forEach(function (b) {
-      addBlock("practice:" + b.key, b.label, b.req);
-    });
-    if (state.channel === "normal") {
-      (CONFIG.majorProfessional[state.mainId] || []).forEach(function (b) {
-        addBlock("major:" + b.key, b.label, b.req);
+    if (!isDouble) {
+      (CONFIG.commonBlocks || []).forEach(function (b) {
+        addBlock("common:" + b.key, b.label, b.req, "主修课程");
+      });
+      (CONFIG.practiceBlocks || []).forEach(function (b) {
+        addBlock("practice:" + b.key, b.label, b.req, "主修实践");
       });
     }
-    if (state.channel === "double") {
+    if (state.channel === "normal") {
+      (CONFIG.majorProfessional[state.mainId] || []).forEach(function (b) {
+        addBlock("major:" + b.key, b.label, b.req, "主修课程");
+      });
+    }
+    if (isDouble) {
       const prog = getYearData() && getYearData().double && getYearData().double[state.doubleId];
       const sum = prog ? prog.reduce(function (acc, c) { return acc + Number(c.credit || 0); }, 0) : 0;
-      addBlock("double:all", "双学士项目课程（参照）", Math.round(sum));
+      addBlock("double:all", "双学士项目课程（参照）", Math.round(sum), "双学士学位");
     }
     const prog = getSecondProgram();
     if (prog && prog.creditNote) {
       const m = prog.creditNote.match(/不少于\s*(\d+)\s*学分/) || prog.creditNote.match(/(\d+)\s*学分/);
       const need = m ? parseInt(m[1], 10) : 0;
-      addBlock("second:req", "第二专业课程要求", need);
+      addBlock("second:req", "第二专业课程要求", need, state.secondType === "minor" ? "辅修专业" : "辅修双学位");
     }
     return req;
   }
@@ -189,24 +192,44 @@
   function renderCards() {
     const el = $id("cards");
     const req = liveReq || blockRequirement();
-    let totalNeed = 0, totalHave = 0;
-    Object.keys(req).forEach(function (k) { totalNeed += req[k].need; totalHave += req[k].have; });
-    const html = [
-      "<div class='card'><div class='label'>已选主修课程</div><div class='value'>" + totalHave + "<small> / " + totalNeed + " 分</small></div></div>",
-      "<div class='card'><div class='label'>当前方案板块数</div><div class='value'>" + Object.keys(req).length + "</div></div>"
-    ].join("");
+    const groupOrder = ["主修课程", "主修实践", "辅修专业", "辅修双学位", "双学士学位"];
+    const sums = {};
+    Object.keys(req).forEach(function (k) {
+      const b = req[k];
+      if (!sums[b.group]) sums[b.group] = { need: 0, have: 0 };
+      sums[b.group].need += b.need;
+      sums[b.group].have += b.have;
+    });
+    const groups = groupOrder.filter(function (g) { return sums[g]; });
+    const html = groups.map(function (g) {
+      return "<div class='card'><div class='label'>" + esc(g) + "</div><div class='value'>" + sums[g].have +
+        "<small> / " + sums[g].need + " 分</small></div></div>";
+    }).join("");
     el.innerHTML = html;
   }
 
   function renderSummary() {
     const req = liveReq || blockRequirement();
-    const tbody = Object.keys(req).map(function (k) {
+    const groupOrder = ["主修课程", "主修实践", "辅修专业", "辅修双学位", "双学士学位"];
+    const sortedKeys = Object.keys(req).sort(function (a, b) {
+      const ga = groupOrder.indexOf(req[a].group);
+      const gb = groupOrder.indexOf(req[b].group);
+      return (ga < 0 ? 99 : ga) - (gb < 0 ? 99 : gb);
+    });
+    let lastGroup = "";
+    const rows = sortedKeys.map(function (k) {
       const b = req[k];
+      let groupRow = "";
+      if (b.group !== lastGroup) {
+        groupRow = "<tr class='group-head'><th colspan='4'>" + esc(b.group) + "</th></tr>";
+        lastGroup = b.group;
+      }
       const remain = Math.max(0, b.need - b.have);
       const cls = remain === 0 ? "ok" : "";
-      return "<tr><td>" + esc(b.label) + "</td><td class='num'>" + b.need + "</td><td class='num'>" + b.have + "</td><td class='num " + cls + "'>" + remain + "</td></tr>";
+      return groupRow + "<tr><td>" + esc(b.label) + "</td><td class='num'>" + b.need +
+        "</td><td class='num'>" + b.have + "</td><td class='num " + cls + "'>" + remain + "</td></tr>";
     }).join("");
-    $id("summaryTable").innerHTML = "<tr><th>板块</th><th>要求</th><th>已修/在读</th><th>还差</th></tr>" + tbody;
+    $id("summaryTable").innerHTML = "<tr><th>板块</th><th>要求</th><th>已修/在读</th><th>还差</th></tr>" + rows;
   }
 
   function renderBlocks(query) {

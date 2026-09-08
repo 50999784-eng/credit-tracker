@@ -39,6 +39,7 @@ summary { cursor:pointer; font-weight:600; color:var(--brand); }
 .summary { width:100%; border-collapse:collapse; margin-top:6px; }
 .summary th,.summary td { border-bottom:1px solid var(--line); padding:6px 8px; text-align:left; font-size:13px; }
 .summary th { background:var(--brand); color:#fff; }
+.summary tr.group-head th { background:#dce6f2; color:#22303f; text-align:left; }
 .summary td.num { text-align:right; }
 .block { margin:18px 0; }
 details.block summary { list-style:none; cursor:pointer; }
