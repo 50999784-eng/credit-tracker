@@ -23,6 +23,11 @@ window.UIBE_PLANS = {
         { id: "finance", label: "金融学–英语类", enabled: true },
         { id: "accounting", label: "英语类–会计学", enabled: false }
       ],
+      doubleReq: {
+        law: { base: 73, other: 57, pro: 130, ge: 48, course: 178, practice: 28, total: 206 },
+        finance: { base: 73, other: 46, pro: 119, ge: 64, course: 183, practice: 28, total: 211 },
+        accounting: { base: 67, other: 42, pro: 109, ge: 64, course: 173, practice: 28, total: 201 }
+      },
       mainTracks: [
         { id: "english-lit", label: "英语（文学方向）", degree: "英语专业" },
         { id: "english-lin", label: "英语（语言学方向）", degree: "英语专业" },
@@ -38,6 +43,11 @@ window.UIBE_PLANS = {
         { id: "finance", label: "金融学–英语类", enabled: true },
         { id: "accounting", label: "英语类–会计学", enabled: true }
       ],
+      doubleReq: {
+        law: { base: 73, other: 57, pro: 130, ge: 48, course: 178, practice: 28, total: 206 },
+        finance: { base: 73, other: 46, pro: 119, ge: 64, course: 183, practice: 28, total: 211 },
+        accounting: { base: 67, other: 42, pro: 109, ge: 64, course: 173, practice: 28, total: 201 }
+      },
       mainTracks: [
         { id: "english-lit", label: "英语（文学方向）", degree: "英语专业" },
         { id: "english-lin", label: "英语（语言学方向）", degree: "英语专业" },
@@ -53,6 +63,11 @@ window.UIBE_PLANS = {
         { id: "finance", label: "金融学–英语类", enabled: true },
         { id: "accounting", label: "英语类–会计学", enabled: true }
       ],
+      doubleReq: {
+        law: { base: 73, other: 57, pro: 130, ge: 48, course: 178, practice: 28, total: 206 },
+        finance: { base: 73, other: 46, pro: 119, ge: 64, course: 183, practice: 28, total: 211 },
+        accounting: { base: 67, other: 42, pro: 109, ge: 64, course: 173, practice: 28, total: 201 }
+      },
       mainTracks: [
         { id: "english-lit", label: "英语（文学方向）", degree: "英语专业" },
         { id: "english-lin", label: "英语（语言学方向）", degree: "英语专业" },
@@ -84,6 +99,22 @@ window.UIBE_PLANS = {
     { key: "thesis", label: "毕业论文", req: 6 },
     { key: "other", label: "其他实践", req: 10 }
   ],
+
+  // 双学士项目自己的通识通修口径（不同项目要求不同）
+  doubleCommon: {
+    law: {
+      core: 4, aesthetic: 2, ge: 4, seminar: 1, politics: 19,
+      pe: 4, math: 4, info: 4, econlaw: 4, career: 2
+    },
+    finance: {
+      core: 4, aesthetic: 2, ge: 4, seminar: 1, politics: 19,
+      pe: 4, math: 16, info: 4, econlaw: 8, career: 2
+    },
+    accounting: {
+      core: 4, aesthetic: 2, ge: 4, seminar: 1, politics: 19,
+      pe: 4, math: 16, info: 4, econlaw: 8, career: 2
+    }
+  },
 
   // 主修方向对应的专业课程学分要求（2023-2025 届相同，届别差异以后再单独覆盖）
   majorProfessional: {
