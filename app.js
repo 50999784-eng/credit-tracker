@@ -16,6 +16,8 @@
     planKey: ""
   };
   let liveReq = null;
+  const openBlocks = new Set();
+  let blockInitialized = false;
 
   function $id(id) { return document.getElementById(id); }
 
@@ -209,6 +211,13 @@
 
   function renderBlocks(query) {
     const area = $id("courseArea");
+    // 记录当前每个板块的展开/折叠状态
+    Array.prototype.forEach.call(area.querySelectorAll("details.block"), function (d) {
+      const key = d.getAttribute("data-bkey");
+      if (!key) return;
+      if (d.open) openBlocks.add(key); else openBlocks.delete(key);
+      blockInitialized = true;
+    });
     const rows = assembleCourses().filter(function (r) {
       if (!query) return true;
       const hay = (r.c.name + " " + r.c.code + " " + r.blockName + " " + r.group).toLowerCase();
@@ -256,7 +265,8 @@
           "</span>" +
           "</div>";
       }).join("");
-      return "<details class='block' open><summary><span class='block-title'>" + esc(g.group + " · " + g.blockName) +
+      const wasOpen = !blockInitialized || openBlocks.has(key);
+      return "<details class='block' data-bkey='" + key + "'" + (wasOpen ? " open" : "") + "><summary><span class='block-title'>" + esc(g.group + " · " + g.blockName) +
         "<small>" + sum + " / " + need + " 分</small></span></summary>" + items + "</details>";
     }).join("");
     area.innerHTML = html || "<p class='muted'>没有匹配的课程</p>";
@@ -443,6 +453,14 @@
     });
     $id("openAllBtn").addEventListener("click", function () { toggleAll(true); });
     $id("closeAllBtn").addEventListener("click", function () { toggleAll(false); });
+    document.addEventListener("toggle", function (e) {
+      const d = e.target;
+      if (!d || !d.classList || !d.classList.contains("block")) return;
+      const key = d.getAttribute("data-bkey");
+      if (!key) return;
+      if (d.open) openBlocks.add(key); else openBlocks.delete(key);
+      blockInitialized = true;
+    }, true);
     $id("courseArea").addEventListener("click", function (e) {
       const btn = e.target.closest("button[data-status]");
       if (!btn) return;
