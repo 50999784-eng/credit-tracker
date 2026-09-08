@@ -240,9 +240,91 @@
       .course-main { flex-basis: 100%; }
       table.summary { display: block; overflow-x: auto; white-space: nowrap; }
     }
+
+    /* ---------- 激活码入口 ---------- */
+    #gateOverlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: #eef2f8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+    }
+    html.unlocked #gateOverlay { display: none; }
+    .gate-card {
+      width: 100%;
+      max-width: 380px;
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 28px 24px 22px;
+      box-shadow: 0 12px 30px rgba(31, 41, 55, .08);
+      text-align: center;
+    }
+    .gate-card h1 {
+      margin: 0 0 4px;
+      font-size: 22px;
+      color: #1f4e78;
+    }
+    .gate-sub { margin: 0 0 18px; color: #6b7280; font-size: 14px; }
+    .gate-input {
+      width: 100%;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 12px 14px;
+      font: inherit;
+      font-size: 17px;
+      letter-spacing: 1px;
+      text-align: center;
+      text-transform: uppercase;
+      box-sizing: border-box;
+    }
+    .gate-input:focus {
+      outline: 2px solid #1f4e78;
+      outline-offset: 1px;
+      border-color: #1f4e78;
+    }
+    .gate-btn {
+      width: 100%;
+      margin-top: 12px;
+      border: 0;
+      border-radius: 10px;
+      background: #1f4e78;
+      color: #fff;
+      padding: 12px 14px;
+      font: inherit;
+      font-size: 15px;
+      cursor: pointer;
+    }
+    .gate-btn:hover { background: #173c5d; }
+    .gate-btn:disabled { opacity: .6; cursor: default; }
+    .gate-msg {
+      min-height: 20px;
+      margin: 12px 0 0;
+      font-size: 13px;
+      color: #c24141;
+    }
+    .gate-hint {
+      margin: 14px 0 0;
+      color: #9ca3af;
+      font-size: 12px;
+      line-height: 1.6;
+    }
   </style>
 </head>
 <body>
+  <div id="gateOverlay" role="dialog" aria-modal="true" aria-labelledby="gateTitle">
+    <div class="gate-card">
+      <h1 id="gateTitle">学分统计系统</h1>
+      <p class="gate-sub">请输入激活码后使用</p>
+      <input type="text" id="gateInput" class="gate-input" placeholder="例如：CT-XXXX-XXXX-XXXX" autocomplete="off" spellcheck="false" autocapitalize="characters">
+      <button type="button" id="gateBtn" class="gate-btn">验证并进入</button>
+      <p id="gateMsg" class="gate-msg" role="alert"></p>
+      <p class="gate-hint">每个激活码限绑定一台设备，验证通过后本机将自动记住。如无法使用，请联系发放激活码的人。</p>
+    </div>
+  </div>
   <div class="wrap">
     <header class="top">
       <div>
@@ -318,6 +400,8 @@
       <p>统计口径基于24级商务英语培养方案与法学辅修双学位方案，最终学分以教务系统为准。</p>
     </footer>
   </div>
+  <script src="codes.js"></script>
+  <script src="gate.js"></script>
   <script src="courses.js"></script>
   <script src="app.js"></script>
 </body>
