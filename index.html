@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>学分统计系统</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --surface: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --line: #e5e7eb;
+      --brand: #1f4e78;
+      --brand-soft: #e8eef5;
+      --green: #2f9e6e;
+      --green-soft: #e6f5ee;
+      --amber: #d68a1c;
+      --amber-soft: #fdf1df;
+      --red: #c24141;
+      --red-soft: #fbeaea;
+      --track: #eef1f5;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Microsoft YaHei", "PingFang SC", "Segoe UI", Arial, sans-serif;
+      line-height: 1.5;
+    }
+    .wrap { max-width: 1040px; margin: 0 auto; padding: 20px 16px 48px; }
+    header.top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    h1 { margin: 0; font-size: 24px; color: var(--brand); }
+    .subtitle { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
+    .top-actions { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+    button {
+      font: inherit;
+      cursor: pointer;
+    }
+    .btn {
+      border: 1px solid var(--line);
+      background: var(--surface);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 6px 12px;
+    }
+    .btn:hover { background: var(--brand-soft); }
+    .save-hint { color: var(--muted); font-size: 12px; }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin: 18px 0 4px;
+    }
+    .search-wrap { flex: 1 1 320px; display: flex; align-items: center; gap: 10px; }
+    .search-input {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 9px 12px;
+      font: inherit;
+      background: var(--surface);
+      color: var(--text);
+    }
+    .search-input:focus {
+      outline: 2px solid var(--brand);
+      outline-offset: 1px;
+      border-color: var(--brand);
+    }
+    .block-actions { display: flex; gap: 8px; }
+    .no-result { color: var(--muted); font-size: 13px; }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin: 20px 0;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 14px 16px;
+    }
+    .card-label { color: var(--muted); font-size: 12px; }
+    .card-value { font-size: 24px; font-weight: 600; margin: 4px 0; }
+    .card-value small { font-size: 13px; color: var(--muted); font-weight: 400; }
+    .card-foot { font-size: 12px; color: var(--muted); }
+
+    .tabs {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin: 18px 0 12px;
+    }
+    .tab {
+      border: 1px solid var(--line);
+      background: var(--surface);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 8px 18px;
+      font-size: 14px;
+    }
+    .tab.active {
+      background: var(--brand);
+      color: #fff;
+      border-color: var(--brand);
+    }
+    .panel[hidden] { display: none; }
+
+    h2 {
+      font-size: 17px;
+      margin: 22px 0 10px;
+      color: var(--brand);
+      border-bottom: 2px solid var(--line);
+      padding-bottom: 6px;
+    }
+    .stat-note { color: var(--muted); font-size: 13px; margin: 8px 0 14px; }
+
+    table.summary {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 14px;
+    }
+    table.summary th, table.summary td {
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      font-size: 13px;
+    }
+    table.summary th {
+      background: var(--brand);
+      color: #fff;
+      font-weight: 500;
+    }
+    table.summary tr:last-child td { border-bottom: none; }
+    table.summary td.num, table.summary th.num { text-align: right; font-variant-numeric: tabular-nums; }
+    table.summary tr.total td { font-weight: 600; background: var(--brand-soft); }
+    .remain { color: var(--red); font-weight: 600; }
+    .ok { color: var(--green); }
+    .progress {
+      background: var(--track);
+      height: 8px;
+      border-radius: 999px;
+      overflow: hidden;
+      min-width: 90px;
+    }
+    .progress > i {
+      display: block;
+      height: 100%;
+      background: var(--green);
+    }
+    .progress > i.over { background: var(--amber); }
+
+    .block { margin: 18px 0 8px; }
+    details.block summary { cursor: pointer; list-style: none; }
+    details.block summary::-webkit-details-marker { display: none; }
+    .block-title {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      font-weight: 600;
+      font-size: 15px;
+      margin: 0 0 6px;
+    }
+    .block-title .mini {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 400;
+    }
+    .block-done { color: var(--green); }
+    .block-missing { color: var(--red); }
+    .course-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 7px 12px;
+      margin-bottom: 6px;
+    }
+    .course-main { flex: 1 1 auto; min-width: 0; }
+    .course-name { font-size: 14px; }
+    .course-meta { color: var(--muted); font-size: 12px; margin-top: 1px; }
+    .course-credit {
+      flex: 0 0 auto;
+      color: var(--brand);
+      font-weight: 600;
+      font-size: 14px;
+      font-variant-numeric: tabular-nums;
+    }
+    .seg {
+      flex: 0 0 auto;
+      display: inline-flex;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      background: #fff;
+    }
+    .seg button {
+      border: 0;
+      border-right: 1px solid var(--line);
+      background: transparent;
+      padding: 5px 9px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .seg button:last-child { border-right: 0; }
+    .seg button[aria-pressed="true"].st-not { background: var(--red-soft); color: var(--red); }
+    .seg button[aria-pressed="true"].st-doing { background: var(--amber-soft); color: var(--amber); }
+    .seg button[aria-pressed="true"].st-done { background: var(--green-soft); color: var(--green); }
+
+    .foot {
+      margin-top: 28px;
+      padding-top: 14px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .foot strong { color: var(--text); }
+
+    @media (max-width: 720px) {
+      .cards { grid-template-columns: 1fr; }
+      .course-item { flex-wrap: wrap; }
+      .course-main { flex-basis: 100%; }
+      table.summary { display: block; overflow-x: auto; white-space: nowrap; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="top">
+      <div>
+        <h1>学分统计系统</h1>
+        <p class="subtitle">商务英语主修 ＋ 法学双学位</p>
+      </div>
+      <div class="top-actions">
+        <span class="save-hint" id="saveHint"></span>
+        <button type="button" class="btn" id="resetBtn">重置为初始状态</button>
+      </div>
+    </header>
+
+    <div class="toolbar">
+      <div class="search-wrap">
+        <input type="search" id="searchInput" class="search-input" placeholder="搜索课程名称、课程代码或板块，例如：英语 / LAW117 / 法学表1">
+        <span class="save-hint" id="searchCount"></span>
+      </div>
+      <div class="block-actions">
+        <button type="button" class="btn" id="openAllBtn">展开全部板块</button>
+        <button type="button" class="btn" id="closeAllBtn">折叠全部板块</button>
+      </div>
+    </div>
+
+    <section class="cards" aria-label="总览">
+      <article class="card">
+        <div class="card-label">主修课程</div>
+        <div class="card-value"><span id="mainEarned">0</span><small> / 152 分</small></div>
+        <div class="card-foot" id="mainFoot">分板块还需 0 分</div>
+      </article>
+      <article class="card">
+        <div class="card-label">主修实践</div>
+        <div class="card-value"><span id="practiceEarned">0</span><small> / 28 分</small></div>
+        <div class="card-foot" id="practiceFoot">还需 0 分</div>
+      </article>
+      <article class="card">
+        <div class="card-label">法学双学位</div>
+        <div class="card-value"><span id="lawEarned">0</span><small> / 41 分课程</small></div>
+        <div class="card-foot" id="lawFoot">学位论文 0 / 6 分</div>
+      </article>
+    </section>
+
+    <nav class="tabs" role="tablist" aria-label="选择统计范围">
+      <button type="button" class="tab active" id="tab-main" role="tab" aria-controls="panel-main" aria-selected="true">主修课程</button>
+      <button type="button" class="tab" id="tab-practice" role="tab" aria-controls="panel-practice" aria-selected="false">实践教学</button>
+      <button type="button" class="tab" id="tab-law" role="tab" aria-controls="panel-law" aria-selected="false">法学双学位</button>
+    </nav>
+
+    <main>
+      <section id="panel-main" role="tabpanel" aria-labelledby="tab-main">
+        <h2>主修课程板块统计</h2>
+        <div id="mainSummary"></div>
+        <div class="stat-note">下面每门课可以切换 未修 / 在读 / 已修，统计会自动更新。</div>
+        <div id="mainCourses"></div>
+      </section>
+
+      <section id="panel-practice" role="tabpanel" aria-labelledby="tab-practice" hidden>
+        <h2>实践教学统计</h2>
+        <div id="practiceSummary"></div>
+        <div class="stat-note">实验课里英语语音与会话、英语歌曲与跨文化沟通等课程与主修课程可能有兼计，请以学校最终认定为准。</div>
+        <div id="practiceCourses"></div>
+      </section>
+
+      <section id="panel-law" role="tabpanel" aria-labelledby="tab-law" hidden>
+        <h2>法学双学位统计</h2>
+        <div id="lawSummary"></div>
+        <div class="stat-note">表1必修十六门共32分，方案要求课程不少于41分，因此再从表2补足约9分；论文另计6分。</div>
+        <div id="lawCourses"></div>
+      </section>
+    </main>
+
+    <footer class="foot">
+      <p><strong>使用提示：</strong>点击课程右侧的“未修 / 在读 / 已修”即可记录进度，页面会自动保存你的选择。新增课程可直接修改页面底部 <code>courses.js</code>，或告诉我帮你加。</p>
+      <p>统计口径基于24级商务英语培养方案与法学辅修双学位方案，最终学分以教务系统为准。</p>
+    </footer>
+  </div>
+  <script src="courses.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
