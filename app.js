@@ -86,9 +86,19 @@
     if (!y) return [];
     const rows = [];
     const practiceMap = { "实验课": "exp", "劳动教育": "labor", "毕业论文": "thesis", "其他实践": "other" };
-    (y.common || []).forEach(function (c) {
+    const isDouble = state.channel === "double";
+    const needsMathB = isDouble && (state.doubleId === "finance" || state.doubleId === "accounting");
+    const commonRows = (y.common || []).filter(function (c) {
+      return !(needsMathB && c.block === "math");
+    });
+    commonRows.forEach(function (c) {
       rows.push({ group: "主修课程", blockName: c.blockName || "通识课程", block: "common:" + c.block, c: c });
     });
+    if (needsMathB) {
+      (y.mathB || []).forEach(function (c) {
+        rows.push({ group: "主修课程", blockName: "数学（B类）", block: "common:math", c: c });
+      });
+    }
     (y.practice || []).forEach(function (c) {
       const key = practiceMap[c.block] || "other";
       rows.push({ group: "主修实践", blockName: c.block, block: "practice:" + key, c: c });
@@ -110,10 +120,11 @@
       const prog = y.double && y.double[state.doubleId];
       if (prog) {
         prog.forEach(function (c) {
+          const isBase = c.block === "majorReq";
           rows.push({
             group: "双学士学位项目",
-            blockName: "项目课程",
-            block: "double:all",
+            blockName: isBase ? "专业必修课（学科基础必修）" : "专业选修 / 方向课程目录",
+            block: isBase ? "double:req" : "double:opt",
             c: c
           });
         });
@@ -122,9 +133,10 @@
     const prog = getSecondProgram();
     if (prog) {
       (prog.rows || []).forEach(function (c) {
+        const isDualSecond = state.secondType === "dual";
         rows.push({
           group: state.secondType === "minor" ? "辅修专业" : "辅修双学位",
-          blockName: c.block,
+          blockName: isDualSecond ? "课程目录（论文已计入毕业要求）" : "课程目录",
           block: "second:req",
           c: c
         });
@@ -158,6 +170,17 @@
       (CONFIG.practiceBlocks || []).forEach(function (b) {
         addBlock("practice:" + b.key, b.label, b.req, "主修实践");
       });
+    } else {
+      const dcommon = CONFIG.doubleCommon[state.doubleId] || {};
+      (CONFIG.commonBlocks || []).forEach(function (b) {
+        const need = (dcommon[b.key] != null ? dcommon[b.key] : b.req);
+        let label = b.label;
+        if (state.doubleId !== "law" && b.key === "math") label = "数学（B类）";
+        addBlock("common:" + b.key, label, need, "主修课程");
+      });
+      (CONFIG.practiceBlocks || []).forEach(function (b) {
+        addBlock("practice:" + b.key, b.label, b.req, "主修实践");
+      });
     }
     if (state.channel === "normal") {
       (CONFIG.majorProfessional[state.mainId] || []).forEach(function (b) {
@@ -165,15 +188,17 @@
       });
     }
     if (isDouble) {
-      const prog = getYearData() && getYearData().double && getYearData().double[state.doubleId];
-      const sum = prog ? prog.reduce(function (acc, c) { return acc + Number(c.credit || 0); }, 0) : 0;
-      addBlock("double:all", "双学士项目课程（参照）", Math.round(sum), "双学士学位");
+      const y = CONFIG.years[state.year];
+      const dreq = y && y.doubleReq && y.doubleReq[state.doubleId];
+      addBlock("double:req", "双学士专业必修课（学科基础必修）", (dreq && dreq.base) || 0, "双学士学位");
+      addBlock("double:opt", "双学士专业选修 / 方向课程", (dreq && dreq.other) || 0, "双学士学位");
     }
     const prog = getSecondProgram();
     if (prog && prog.creditNote) {
       const m = prog.creditNote.match(/不少于\s*(\d+)\s*学分/) || prog.creditNote.match(/(\d+)\s*学分/);
       const need = m ? parseInt(m[1], 10) : 0;
-      addBlock("second:req", "第二专业课程要求", need, state.secondType === "minor" ? "辅修专业" : "辅修双学位");
+      const group = state.secondType === "minor" ? "辅修专业" : "辅修双学位";
+      addBlock("second:req", "第二专业毕业要求（论文已计入）", need, group);
     }
     return req;
   }
@@ -229,7 +254,17 @@
       return groupRow + "<tr><td>" + esc(b.label) + "</td><td class='num'>" + b.need +
         "</td><td class='num'>" + b.have + "</td><td class='num " + cls + "'>" + remain + "</td></tr>";
     }).join("");
-    $id("summaryTable").innerHTML = "<tr><th>板块</th><th>要求</th><th>已修/在读</th><th>还差</th></tr>" + rows;
+    let note = "";
+    if (state.channel === "double") {
+      const y = CONFIG.years[state.year];
+      const dreq = y && y.doubleReq && y.doubleReq[state.doubleId];
+      if (dreq) {
+        note = "<tr class='note-row'><td colspan='4'>方案口径：上方主修课程 = 本项目通识通修 " + dreq.ge +
+          " 分；双学士专业课程 " + dreq.pro + " 分 + 主修实践 " + dreq.practice +
+          " 分，毕业总要求 " + dreq.total + " 分。</td></tr>";
+      }
+    }
+    $id("summaryTable").innerHTML = "<tr><th>板块</th><th>要求</th><th>已修/在读</th><th>还差</th></tr>" + rows + note;
   }
 
   function renderBlocks(query) {
@@ -298,7 +333,7 @@
   function statusBtn(r, text, current, cls) {
     const on = current === text;
     const stateCls = on ? " on-" + cls : "";
-    return "<button type='button' class='" + stateCls + "' data-key='" + esc(r.c.code + "||" + r.c.name) +
+    return "<button type='button' class='" + stateCls + "' data-sk='" + esc(statusKey(r.c)) +
       "' data-status='" + text + "' data-block='" + esc(r.block) + "' data-rowblock='" + esc(r.block) + "'>" + text + "</button>";
   }
 
@@ -488,11 +523,11 @@
       const btn = e.target.closest("button[data-status]");
       if (!btn) return;
       const st = btn.getAttribute("data-status");
-      const code = btn.getAttribute("data-key").split("||")[0];
-      const name = btn.getAttribute("data-key").split("||")[1];
-      const block = btn.getAttribute("data-rowblock");
+      const sk = btn.getAttribute("data-sk");
       const rows = assembleCourses();
-      const course = rows.find(function (r) { return r.block === block && r.c.code === code && r.c.name === name; });
+      const course = sk
+        ? rows.find(function (r) { return statusKey(r.c) === sk; })
+        : null;
       if (course) setStatus(course.c, st);
     });
   }
