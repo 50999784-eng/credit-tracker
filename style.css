@@ -36,17 +36,21 @@ header { display:flex; justify-content:space-between; align-items:flex-start; ga
 .card .foot { font-size:12px; color:var(--muted); }
 details { background:var(--card); border:1px solid var(--line); border-radius:10px; margin:12px 0; padding:8px 12px; }
 summary { cursor:pointer; font-weight:600; color:var(--brand); }
-.summary { width:100%; border-collapse:collapse; margin-top:6px; }
+.summary { width:100%; table-layout:fixed; border-collapse:collapse; margin-top:6px; }
 .summary th,.summary td { border-bottom:1px solid var(--line); padding:6px 8px; text-align:left; font-size:13px; }
 .summary th { background:var(--brand); color:#fff; }
 .summary tr.group-head th { background:#dce6f2; color:#22303f; text-align:left; }
 .summary tr.note-row td { background:#f6f8fb; color:var(--muted); font-size:12px; line-height:1.7; }
 .summary td.num { text-align:right; }
+.summary th:nth-child(1), .summary td:nth-child(1) { width:34%; }
+.summary th:nth-child(2), .summary td:nth-child(2) { width:20%; }
+.summary th:nth-child(3), .summary td:nth-child(3) { width:24%; }
+.summary th:nth-child(4), .summary td:nth-child(4) { width:22%; }
 .block { margin:18px 0; }
 details.block summary { list-style:none; cursor:pointer; }
 details.block[open] summary { margin-bottom:6px; }
-.block-title { font-weight:700; }
-.block-title small { color:var(--muted); font-weight:400; margin-left:8px; }
+.block-title { display:flex; justify-content:space-between; align-items:baseline; gap:10px; width:100%; font-weight:700; }
+.block-title small { color:var(--muted); font-weight:400; white-space:nowrap; }
 .course-item { display:flex; align-items:center; gap:8px; background:#fff; border:1px solid var(--line); border-radius:8px; padding:6px 10px; margin:4px 0; }
 .course-name { flex:1; min-width:0; font-size:14px; }
 .course-meta { color:var(--muted); font-size:12px; }
