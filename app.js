@@ -259,8 +259,12 @@
       return (ga < 0 ? 99 : ga) - (gb < 0 ? 99 : gb);
     });
     let lastGroup = "";
+    let needTotal = 0;
+    let haveTotal = 0;
     const rows = sortedKeys.map(function (k) {
       const b = req[k];
+      needTotal += b.need;
+      haveTotal += b.have;
       let groupRow = "";
       if (b.group !== lastGroup) {
         groupRow = "<tr class='group-head'><th colspan='4'>" + esc(b.group) + "</th></tr>";
@@ -271,6 +275,9 @@
       return groupRow + "<tr><td>" + esc(b.label) + "</td><td class='num'>" + b.need +
         "</td><td class='num'>" + b.have + "</td><td class='num " + cls + "'>" + remain + "</td></tr>";
     }).join("");
+    const remainTotal = Math.max(0, needTotal - haveTotal);
+    const totalRow = "<tr class='total-row'><td>总分（毕业要求合计）</td><td class='num'>" + needTotal +
+      "</td><td class='num'>" + haveTotal + "</td><td class='num'>" + remainTotal + "</td></tr>";
     let note = "";
     if (state.channel === "double") {
       const y = CONFIG.years[state.year];
@@ -281,7 +288,7 @@
           " 分，毕业总要求 " + dreq.total + " 分。</td></tr>";
       }
     }
-    $id("summaryTable").innerHTML = "<tr><th>板块</th><th>要求</th><th>已修/在读</th><th>还差</th></tr>" + rows + note;
+    $id("summaryTable").innerHTML = "<tr><th>板块</th><th>要求</th><th>已修/在读</th><th>还差</th></tr>" + rows + totalRow + note;
   }
 
   function renderBlocks(query) {
