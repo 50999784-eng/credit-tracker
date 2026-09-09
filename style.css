@@ -41,6 +41,7 @@ summary { cursor:pointer; font-weight:600; color:var(--brand); }
 .summary th { background:var(--brand); color:#fff; }
 .summary tr.group-head th { background:#dce6f2; color:#22303f; text-align:left; }
 .summary tr.note-row td { background:#f6f8fb; color:var(--muted); font-size:12px; line-height:1.7; }
+.summary tr.total-row td { background:#eaf1f8; font-weight:700; border-top:2px solid var(--brand); }
 .summary td.num { text-align:right; }
 .summary th:nth-child(1), .summary td:nth-child(1) { width:34%; }
 .summary th:nth-child(2), .summary td:nth-child(2) { width:20%; }
