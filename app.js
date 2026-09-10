@@ -13,6 +13,7 @@
     secondType: "none",
     secondId: "",
     statuses: {},
+    custom: [],
     planKey: ""
   };
   let liveReq = null;
@@ -34,7 +35,8 @@
   }
 
   function statusKey(course) {
-    return [course.block, course.code, course.name, course.credit, course.semester || ""].join("||");
+    const base = [course.block, course.code, course.name, course.credit, course.semester || ""].join("||");
+    return course.customId ? base + "||custom:" + course.customId : base;
   }
 
   function loadStatuses() {
@@ -49,6 +51,22 @@
     if (!state.planKey) return;
     try {
       localStorage.setItem("v2-stat-" + state.planKey, JSON.stringify(state.statuses));
+    } catch (e) { /* ignore */ }
+  }
+
+  function loadCustomCourses() {
+    if (!state.planKey) return [];
+    try {
+      const raw = localStorage.getItem("v2-custom-" + state.planKey);
+      const list = raw ? JSON.parse(raw) : [];
+      return Array.isArray(list) ? list : [];
+    } catch (e) { return []; }
+  }
+
+  function saveCustomCourses() {
+    if (!state.planKey) return;
+    try {
+      localStorage.setItem("v2-custom-" + state.planKey, JSON.stringify(state.custom || []));
     } catch (e) { /* ignore */ }
   }
 
@@ -158,6 +176,22 @@
         });
       });
     }
+    (state.custom || []).forEach(function (entry) {
+      if (!entry || !entry.block) return;
+      rows.push({
+        group: entry.group || "主修课程",
+        blockName: entry.blockName || "自定义课程",
+        block: entry.block,
+        c: {
+          block: entry.block,
+          code: entry.code || "",
+          name: entry.name || "",
+          credit: Number(entry.credit || 0),
+          semester: entry.semester || "",
+          customId: entry.id
+        }
+      });
+    });
     return rows;
   }
 
@@ -335,7 +369,10 @@
       }, 0);
       const items = g.rows.map(function (r) {
         const st = selectedStatus(r.c);
-        return "<div class='course-item'>" +
+        const custom = r.c.customId
+          ? "<span class='custom-tag'>自定义</span><button type='button' class='del-course-btn' data-cid='" + esc(r.c.customId) + "'>删除</button>"
+          : "";
+        return "<div class='course-item" + (r.c.customId ? " custom-item" : "") + "'>" +
           "<div class='course-name'>" + esc(r.c.name) +
           "<div class='course-meta'>" + esc(r.c.code || "") + (r.c.semester ? " · " + esc(r.c.semester) + "学期" : "") + "</div>" +
           "</div>" +
@@ -345,11 +382,25 @@
             statusBtn(r, "在读", st, "doing") +
             statusBtn(r, "已修", st, "done") +
           "</span>" +
+          custom +
           "</div>";
       }).join("");
+      const addForm = "<div class='custom-add'>" +
+        "<button type='button' class='btn add-course-btn'>+ 添加课程</button>" +
+        "<div class='custom-form' hidden>" +
+          "<input type='text' class='cf-input cf-name' placeholder='课程名称（必填）'>" +
+          "<input type='text' class='cf-input cf-code' placeholder='课程代码'>" +
+          "<input type='number' class='cf-input cf-credit' min='0' step='0.5' placeholder='学分（必填）'>" +
+          "<input type='text' class='cf-input cf-semester' placeholder='学期，如 3 或 3-4'>" +
+          "<div class='cf-actions'>" +
+            "<button type='button' class='btn btn-primary save-course-btn' data-block='" + esc(g.block) + "' data-blockname='" + esc(g.blockName) + "' data-group='" + esc(g.group) + "'>保存</button>" +
+            "<button type='button' class='btn cancel-course-btn'>取消</button>" +
+          "</div>" +
+        "</div>" +
+      "</div>";
       const wasOpen = !blockInitialized || openBlocks.has(key);
       return "<details class='block' data-bkey='" + key + "'" + (wasOpen ? " open" : "") + "><summary><span class='block-title'>" + esc(g.group + " · " + g.blockName) +
-        "<small>" + sum + " / " + need + " 分</small></span></summary>" + items + "</details>";
+        "<small>" + sum + " / " + need + " 分</small></span></summary>" + items + addForm + "</details>";
     }).join("");
     area.innerHTML = html || "<p class='muted'>没有匹配的课程</p>";
   }
@@ -394,6 +445,7 @@
     $id("app").hidden = false;
     state.planKey = planKeyOf();
     state.statuses = loadStatuses();
+    state.custom = loadCustomCourses();
     renderAll();
     window.scrollTo(0, 0);
   }
@@ -544,6 +596,65 @@
       blockInitialized = true;
     }, true);
     $id("courseArea").addEventListener("click", function (e) {
+      const addBtn = e.target.closest(".add-course-btn");
+      if (addBtn) {
+        const form = addBtn.parentElement.querySelector(".custom-form");
+        if (form) {
+          form.hidden = !form.hidden;
+          if (!form.hidden) {
+            const first = form.querySelector(".cf-name");
+            if (first) first.focus();
+          }
+        }
+        return;
+      }
+      const cancelBtn = e.target.closest(".cancel-course-btn");
+      if (cancelBtn) {
+        const form = cancelBtn.closest(".custom-form");
+        if (form) form.hidden = true;
+        return;
+      }
+      const delBtn = e.target.closest(".del-course-btn");
+      if (delBtn) {
+        const cid = delBtn.getAttribute("data-cid");
+        state.custom = (state.custom || []).filter(function (x) { return x.id !== cid; });
+        Object.keys(state.statuses).forEach(function (k) {
+          if (k.indexOf("||custom:" + cid) >= 0) delete state.statuses[k];
+        });
+        saveCustomCourses();
+        saveStatuses();
+        renderAll();
+        return;
+      }
+      const saveBtn = e.target.closest(".save-course-btn");
+      if (saveBtn) {
+        const wrap = saveBtn.closest(".custom-add");
+        const nameEl = wrap.querySelector(".cf-name");
+        const codeEl = wrap.querySelector(".cf-code");
+        const creditEl = wrap.querySelector(".cf-credit");
+        const semEl = wrap.querySelector(".cf-semester");
+        const name = (nameEl.value || "").trim();
+        const credit = Number(creditEl.value);
+        if (!name || !(credit > 0)) {
+          $id("saveHint").textContent = "请填写课程名称和大于 0 的学分";
+          return;
+        }
+        const entry = {
+          id: "c-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 7),
+          block: saveBtn.getAttribute("data-block"),
+          blockName: saveBtn.getAttribute("data-blockname"),
+          group: saveBtn.getAttribute("data-group"),
+          name: name,
+          code: (codeEl.value || "").trim(),
+          credit: credit,
+          semester: (semEl.value || "").trim()
+        };
+        state.custom = (state.custom || []).concat([entry]);
+        saveCustomCourses();
+        $id("saveHint").textContent = "已添加，仅本机当前方案可见";
+        renderAll();
+        return;
+      }
       const btn = e.target.closest("button[data-status]");
       if (!btn) return;
       const st = btn.getAttribute("data-status");
