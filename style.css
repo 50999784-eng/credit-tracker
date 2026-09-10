@@ -54,9 +54,16 @@ details.block[open] summary { margin-bottom:6px; }
 .block-title { display:flex; justify-content:space-between; align-items:baseline; gap:10px; width:100%; font-weight:700; }
 .block-title small { color:var(--muted); font-weight:400; white-space:nowrap; }
 .course-item { display:flex; align-items:center; gap:8px; background:#fff; border:1px solid var(--line); border-radius:8px; padding:6px 10px; margin:4px 0; }
+.course-item.custom-item { background:#fbfdff; border-color:#cfe0f2; }
 .course-name { flex:1; min-width:0; font-size:14px; }
 .course-meta { color:var(--muted); font-size:12px; }
 .course-credit { color:var(--brand); font-weight:600; }
+.custom-tag { color:#2f6fae; background:#e8f1fa; border-radius:5px; padding:2px 6px; font-size:11px; white-space:nowrap; }
+.del-course-btn { border:0; background:transparent; color:var(--red); cursor:pointer; font-size:12px; padding:2px 4px; }
+.custom-add { margin:8px 0 4px; }
+.custom-form { display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; padding:8px; border:1px dashed #c7d6e5; border-radius:8px; background:#f7fafd; }
+.cf-input { border:1px solid var(--line); border-radius:7px; padding:6px 8px; font:inherit; font-size:13px; min-width:120px; flex:1 1 140px; background:#fff; }
+.cf-actions { display:flex; gap:6px; align-items:center; }
 .seg { display:inline-flex; border:1px solid var(--line); border-radius:7px; overflow:hidden; background:#fff; }
 .seg button { border:0; border-right:1px solid var(--line); padding:4px 7px; background:transparent; color:var(--muted); font-size:12px; cursor:pointer; }
 .seg button:last-child { border-right:0; }
