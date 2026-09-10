@@ -39,10 +39,11 @@ summary { cursor:pointer; font-weight:600; color:var(--brand); }
 .summary { width:100%; table-layout:fixed; border-collapse:collapse; margin-top:6px; }
 .summary th,.summary td { border-bottom:1px solid var(--line); padding:6px 8px; text-align:left; font-size:13px; }
 .summary th { background:var(--brand); color:#fff; }
+.summary th:nth-child(2), .summary th:nth-child(3), .summary th:nth-child(4) { text-align:center; }
 .summary tr.group-head th { background:#dce6f2; color:#22303f; text-align:left; }
 .summary tr.note-row td { background:#f6f8fb; color:var(--muted); font-size:12px; line-height:1.7; }
 .summary tr.total-row td { background:#eaf1f8; font-weight:700; border-top:2px solid var(--brand); }
-.summary td.num { text-align:right; }
+.summary td.num { text-align:center; }
 .summary th:nth-child(1), .summary td:nth-child(1) { width:34%; }
 .summary th:nth-child(2), .summary td:nth-child(2) { width:20%; }
 .summary th:nth-child(3), .summary td:nth-child(3) { width:24%; }
