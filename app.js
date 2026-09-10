@@ -468,7 +468,7 @@
     const yearList = $id("yearList");
     bindClick(yearList, function (id) {
       state.year = id;
-      state.channel = ""; state.mainId = ""; state.secondType = "none"; state.secondId = "";
+      state.channel = ""; state.doubleId = ""; state.mainId = ""; state.secondType = "none"; state.secondId = "";
       renderYearChoices();
       renderChannelChoices();
       $id("channelSection").hidden = false;
@@ -479,7 +479,7 @@
     const channelList = $id("channelList");
     bindClick(channelList, function (id) {
       state.channel = id;
-      state.mainId = ""; state.secondType = "none"; state.secondId = "";
+      state.doubleId = ""; state.mainId = ""; state.secondType = "none"; state.secondId = "";
       if (id === "normal") {
         renderMainChoices();
         $id("mainSection").hidden = false;
