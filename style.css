@@ -64,6 +64,8 @@ details.block[open] summary { margin-bottom:6px; }
 .seg button.on-doing { background:var(--amber-soft); color:var(--amber); }
 .seg button.on-done { background:var(--green-soft); color:var(--green); }
 footer { margin-top:24px; color:var(--muted); font-size:12px; border-top:1px solid var(--line); padding-top:10px; }
+.site-contact { max-width:1040px; margin:6px auto 42px; padding:0 16px; color:var(--muted); font-size:13px; text-align:center; }
+.site-contact strong { color:var(--brand); letter-spacing:.4px; }
 @media (max-width:720px){ .course-item{flex-wrap:wrap} .summary{display:block;overflow-x:auto} }
 #gateOverlay { position:fixed; inset:0; z-index:9999; background:#eef2f8; display:flex; align-items:center; justify-content:center; padding:18px; }
 html.unlocked #gateOverlay { display:none; }
